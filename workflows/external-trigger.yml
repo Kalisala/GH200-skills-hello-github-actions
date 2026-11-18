@@ -1,0 +1,27 @@
+name: External API Dispatch Handler
+
+on:
+  repository_dispatch:
+    # 只接收這兩種自訂事件類型
+    types: [run-tests, deploy-to-prod]
+
+jobs:
+  handle-dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 顯示觸發資訊與 Payload
+        run: |
+          echo "觸發事件類型 (event_type): ${{ github.event.action }}"
+          echo "目標環境 (env): ${{ github.event.client_payload.env }}"
+          echo "版本標籤 (version): ${{ github.event.client_payload.version }}"
+          echo "觸發者帳號: ${{ github.actor }}"
+
+      - name: 執行測試流程 (僅限 run-tests)
+        if: github.event.action == 'run-tests'
+        run: |
+          echo "正在對 ${{ github.event.client_payload.env }} 環境執行自動化測試..."
+
+      - name: 執行部署流程 (僅限 deploy-to-prod)
+        if: github.event.action == 'deploy-to-prod'
+        run: |
+          echo "正在將 ${{ github.event.client_payload.version }} 部署至正式環境..."
